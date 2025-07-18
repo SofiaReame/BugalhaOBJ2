@@ -1,40 +1,14 @@
 import java.util.Random;
 
-/**
- * Representa um dado de 1 a 6 usado no jogo Bugalha.
- */
 public class Dado {
-    private int valor;
+    private Random random;
 
-    /**
-     * Construtor padrão que sorteia o valor do dado automaticamente ao criar.
-     */
     public Dado() {
-        rolar();
+        random = new Random();
     }
 
-    /**
-     * Retorna o valor atual do dado.
-     * @return valor do dado entre 1 e 6.
-     */
-    public int getValor() {
-        return valor;
-    }
-
-    /**
-     * Sorteia um novo valor aleatório entre 1 e 6.
-     */
-    public void rolar() {
-        Random random = new Random();
-        this.valor = random.nextInt(6) + 1; // Gera número entre 1 e 6
-    }
-
-    /**
-     * Retorna a representação textual do dado.
-     * @return valor como String.
-     */
-    @Override
-    public String toString() {
-        return String.valueOf(valor);
+    // Rola o dado e retorna um número de 1 a 6
+    public int rolar() {
+        return random.nextInt(6) + 1; // (0 a 5) + 1 = (1 a 6)
     }
 }

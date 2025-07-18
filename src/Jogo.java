@@ -1,71 +1,68 @@
 import java.util.Scanner;
 
-/**
- * Gerencia toda a lógica do jogo Bugalha entre dois jogadores.
- */
 public class Jogo {
+
     private Jogador jogador1;
     private Jogador jogador2;
     private Scanner scanner;
 
-    public Jogo(String nome1, String nome2) {
-        this.jogador1 = new Jogador(nome1);
-        this.jogador2 = new Jogador(nome2);
-        this.scanner = new Scanner(System.in);
+    public Jogo(Scanner scanner, String nomeJogador1, String nomeJogador2) {
+        this.scanner = scanner;
+        this.jogador1 = new Jogador(nomeJogador1);
+        this.jogador2 = new Jogador(nomeJogador2);
     }
 
-    public void iniciar() {
-        Jogador[] jogadores = { jogador1, jogador2 };
-        int turno = 0;
+    // Rola o dado para o jogador 1
+    public int rolarDadoDaVez() {
+        return jogador1.rolarDado();
+    }
 
-        while (!jogador1.estaComTabuleiroCompleto() && !jogador2.estaComTabuleiroCompleto()) {
-            Jogador atual = jogadores[turno % 2];
-            System.out.println("\nVez de: " + atual.getNome());
+    // Jogada do jogador 1
+    public boolean jogarNaColuna(int coluna, int valor) {
+        return jogador1.adicionarDado(coluna, valor, jogador2);
+    }
 
-            Dado dado = new Dado();
-            System.out.println("Dado rolado: " + dado.getValor());
+    // Jogada do adversario 
+    public void jogarNoAdversario(int coluna, int valor) {
+        jogador2.adicionarDado(coluna, valor, jogador1);
+    }
 
-            atual.mostrarTabuleiro();
+    // Mostra os tabuleiros
+    public void mostrarTabuleiros() {
+        jogador1.mostrarTabuleiroBonito();
+        jogador2.mostrarTabuleiroBonito();
+    }
 
-            boolean posicionado = false;
-            while (!posicionado) {
-                System.out.print("Escolha a linha (0-2): ");
-                int linha = scanner.nextInt();
-                System.out.print("Escolha a coluna (0-2): ");
-                int coluna = scanner.nextInt();
+    // Verifica se o tabuleiro de ambos os jogadores está cheio
+    public boolean fimDeJogo() {
+        return tabuleiroCheio(jogador1) || tabuleiroCheio(jogador2);
+    }
 
-                posicionado = atual.posicionarDado(linha, coluna, dado.getValor());
-                if (!posicionado) {
-                    System.out.println("Posição inválida ou ocupada. Tente novamente.");
-                }
+    // Método auxiliar para verificar se todas as colunas estão cheias
+    private boolean tabuleiroCheio(Jogador jogador) {
+        for (int i = 0; i < 3; i++) {
+            if (jogador.getColunas()[i].size() < 3) {
+                return false;
             }
-
-            atual.mostrarTabuleiro();
-            turno++;
         }
-
-        encerrarJogo();
+        return true;
     }
 
-    private void encerrarJogo() {
-        System.out.println("\nFim do jogo!");
-        jogador1.mostrarTabuleiro();
-        jogador2.mostrarTabuleiro();
-
+    // Exibe as pontuações finais e quem venceu
+    public void mostrarPontuacoesEFim() {
         int pontos1 = jogador1.calcularPontuacao();
         int pontos2 = jogador2.calcularPontuacao();
 
-        System.out.println(jogador1.getNome() + " fez " + pontos1 + " pontos.");
-        System.out.println(jogador2.getNome() + " fez " + pontos2 + " pontos.");
+        System.out.println("\nPontuação final:");
+        System.out.println(jogador1.getNome() + ": " + pontos1 + " pontos");
+        System.out.println(jogador2.getNome() + ": " + pontos2 + " pontos");
 
         if (pontos1 > pontos2) {
-            System.out.println(jogador1.getNome() + " venceu!");
+            System.out.println("Paraebens, " + jogador1.getNome() + " venceu!");
         } else if (pontos2 > pontos1) {
-            System.out.println(jogador2.getNome() + " venceu!");
+            System.out.println("Parabens, " + jogador2.getNome() + " venceu!");
         } else {
             System.out.println("Empate!");
         }
-
-        scanner.close();
     }
 }
