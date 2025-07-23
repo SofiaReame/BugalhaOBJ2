@@ -1,7 +1,7 @@
 package Bugalha;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Jogador {
@@ -9,7 +9,7 @@ public class Jogador {
     private ArrayList<Integer>[] colunas; // 3 colunas de dados
     private Random random; // Para gerar dados aleatórios
 
-    @SuppressWarnings("unchecked")
+    //@SuppressWarnings("unchecked")
     public Jogador(String nome) {
         setNome(nome);
         colunas = new ArrayList[3]; // 3 colunas
@@ -26,33 +26,36 @@ public class Jogador {
 
     // Adiciona um dado em uma coluna específica
   public boolean adicionarDado(int coluna, int valor, Jogador adversario) {
-    if (coluna < 0 || coluna >= 3 || colunas[coluna].size() >= 3) {
+     if (coluna < 0 || coluna >= 3 || colunas[coluna].size() >= 3) {
         return false;
-    }
+     }
 
-    // Adiciona o valor à coluna
-    colunas[coluna].add(valor);
+     // Adiciona o valor à coluna deste jogador
+        colunas[coluna].add(valor);
 
-    // Verifica e remove valores iguais na mesma coluna do adversário
-    List<Integer> colunaAdversario = adversario.colunas[coluna];
-    boolean houveRemocao = false;
+        // Obtém a lista de dados do adversário na mesma coluna
+        ArrayList<Integer> colunaDoAdversario = adversario.colunas[coluna];
+        int quantidadeRemovida = 0;
 
-    // Percorre de trás pra frente pra evitar problemas ao remover elementos
-    for (int i = colunaAdversario.size() - 1; i >= 0; i--) {
-        if (colunaAdversario.get(i) == valor) {
-            colunaAdversario.remove(i);
-            houveRemocao = true;
+        // Iterator sobre a coluna do adversário e remove todos os valores iguais
+        Iterator<Integer> iterador = colunaDoAdversario.iterator();
+        while (iterador.hasNext()) {
+            if (iterador.next().equals(valor)) {
+                iterador.remove();
+                quantidadeRemovida++;
+            }
         }
-    }
 
-    if (houveRemocao) {
-        System.out.println(adversario.getNome() + " teve um " + valor + " anulado na coluna " + coluna);
-    }
+        if (quantidadeRemovida > 0) {
+            System.out.println(adversario.getNome()
+                + " perdeu " + quantidadeRemovida
+                + (quantidadeRemovida == 1 ? " dado" : " dados")
+                + " de valor " + valor
+                + " na coluna " + coluna);
+        }
         return true;
-
-}
-
-    // Exibe o tabuleiro de maneira simples (só para testes)
+    }
+    // Exibe o tabuleiro (teste)
     public void mostrarTabuleiro() {
         System.out.println("Tabuleiro de " + nome + ":");
         for (int i = 0; i < 3; i++) {
@@ -66,7 +69,7 @@ public class Jogador {
         }
     }
 
-    // Novo método: exibe o tabuleiro bonito como uma matriz
+    // Exibe o tabuleiro bonito como uma matriz
     public void mostrarTabuleiroBonito() {
         System.out.println("\nTabuleiro de " + nome + ":");
 
