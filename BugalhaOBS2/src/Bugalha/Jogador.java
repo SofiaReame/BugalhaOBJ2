@@ -59,6 +59,12 @@ public class Jogador {
             System.out.println("Coluna " + (i+1) + ": " + colunas[i]);
         }
     }
+    
+    public void limparTabuleiro() {
+        for (ArrayList<Integer> coluna : colunas) {
+            coluna.clear();
+        }
+    }
 
     // Novo método: exibe o tabuleiro bonito como uma matriz
     public void mostrarTabuleiroBonito() {
@@ -87,7 +93,7 @@ public class Jogador {
         }
         System.out.println("+---+---+---+");
     }
-
+    
     // Calcula a pontuação atual do jogador
     public int calcularPontuacao() {
         int pontuacao = 0;

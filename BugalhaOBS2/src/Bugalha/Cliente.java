@@ -15,13 +15,13 @@ public class Cliente {
     private Jogo jogo;
     private boolean minhaVez;
 
-    public Cliente() throws Exception {
-        scanner = new Scanner(System.in);
+    public Cliente(Scanner scanner) throws Exception {
+        this.scanner = scanner;
 
         System.out.print("Digite seu nome: ");
         String meuNome = scanner.nextLine().trim();
 
-        String ipServidor = "192.168.0.106"; // IP Vitoria
+        String ipServidor = "192.168.0.245"; // IP Vitoria
         int portaServidor = 12345;
 
         System.out.println("Conectando ao servidor...");
@@ -47,14 +47,39 @@ public class Cliente {
         System.out.println("Voce eh o jogador " + idJogador);
         System.out.println("Seu nome: " + nomeJogador);
         System.out.println("Adversario: " + nomeAdversario);
-
+        
         // Cria jogo com nomes
         jogo = new Jogo(scanner, nomeJogador, nomeAdversario);
+        
+        boolean continuar = true;
+        
+        do {   
+           // inicia jogo e gerencia reinício
+           jogar(); 
+           
+            // Após fim da partida, verifica reinício
+            System.out.print("\nDeseja jogar novamente? (s/n): ");
+            String resposta = scanner.nextLine().trim();
+            saida.writeObject(resposta);
+            saida.flush();
 
-        jogar();
+            String respostaAdversario = (String) entrada.readObject();
+
+            if (resposta.equalsIgnoreCase("s") && respostaAdversario.equalsIgnoreCase("s")) {
+                jogo.reiniciarTabuleiros(); 
+                minhaVez = !minhaVez; 
+                System.out.println("\nNovo jogo iniciado!\n");
+            } else {
+                continuar = false;
+                System.out.println("\nUm dos jogadores optou por sair. Encerrando partida.");
+            }
+        } while (continuar);
+         
+        socket.close(); // encerra conexão ao final
     }
 
     private void jogar() throws Exception {
+
         while (true) {
             if (jogo.fimDeJogo()) {
                 System.out.println("\n*** FIM DE JOGO ***");
@@ -63,7 +88,6 @@ public class Cliente {
                 break;
             }
 
-            
             if (minhaVez) {
                 System.out.println("\nSua vez de jogar!");
                 jogo.mostrarTabuleiros();
@@ -109,7 +133,12 @@ public class Cliente {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        new Cliente();
+    public static void main(String[] args) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            new Cliente(scanner);
+        } catch (Exception e) {
+            System.out.println("Erro no cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

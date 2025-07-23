@@ -49,13 +49,19 @@ public class Jogo {
         }
         return true;
     }
+    
+    public void reiniciarTabuleiros() {
+        jogador1.limparTabuleiro();
+        jogador2.limparTabuleiro();
+    }
 
+    
     // Exibe as pontuações finais e quem venceu
     public void mostrarPontuacoesEFim() {
         int pontos1 = jogador1.calcularPontuacao();
         int pontos2 = jogador2.calcularPontuacao();
 
-        System.out.println("\nPontuação final:");
+        System.out.println("\nPontuacao final:");
         System.out.println(jogador1.getNome() + ": " + pontos1 + " pontos");
         System.out.println(jogador2.getNome() + ": " + pontos2 + " pontos");
 
