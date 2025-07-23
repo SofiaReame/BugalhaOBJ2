@@ -21,7 +21,10 @@ public class Cliente {
         System.out.print("Digite seu nome: ");
         String meuNome = scanner.nextLine().trim();
 
-        String ipServidor = "192.168.0.245"; // IP Vitoria
+        /*======================LEMBRAR DE TROCAR O IP DE ACORDO COM OS TESTES ======================*/
+        
+        //String ipServidor = "192.168.0.245"; // IP V
+        String ipServidor = "192.168.0.222"; // IP S
         int portaServidor = 12345;
 
         System.out.println("Conectando ao servidor...");
