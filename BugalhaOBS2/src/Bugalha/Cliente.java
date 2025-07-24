@@ -12,6 +12,7 @@ public class Cliente {
     private ObjectInputStream entrada;
     private Scanner scanner;
 
+    private Podio podio;
     private Jogo jogo;
     private boolean minhaVez;
 
