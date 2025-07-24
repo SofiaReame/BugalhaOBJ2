@@ -20,149 +20,152 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-// O arquivo XML será salvo como "podio.xml" na raiz do projeto
 
+// O arquivo XML será salvo como "podio.xml" na raiz do projeto
+ 
 public class Podio {
     private static final String ARQUIVO_XML = "podio.xml";
     private List<EntradaPodio> entradas;
 
+    public Podio() {
+        entradas = new ArrayList<>();
+    }
+
     
-     //Representa uma entrada do pódio (nome e pontuação)
+    //Carrega o arquivo de pódio. Se não existir, cria a estrutura básica
+    //Em caso de erro, imprime mensagem e mantém lista vazia
      
-    public static class EntradaPodio {
-        private String nome;
-        private int pontuacao;
+    public void carregarPodio() {
+        try {
+            File arquivo = new File(ARQUIVO_XML);
+            if (!arquivo.exists()) {
+                Document doc = criarDocumento();
+                Element raiz = doc.createElement("podio");
+                doc.appendChild(raiz);
+                salvarDocumento(doc);
+            }
 
-        public EntradaPodio(String nome, int pontuacao) {
-           setNome(nome);
-            setPontuacao(pontuacao);
-        }
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = builder.parse(new File(ARQUIVO_XML));
+            NodeList listaEntradas = doc.getElementsByTagName("entrada");
+            entradas.clear();
 
-        public String getNome() {
-            return nome;
-        }
+            for (int i = 0; i < listaEntradas.getLength(); i++) {
+                Element elem = (Element) listaEntradas.item(i);
+                String nome = elem.getElementsByTagName("nome").item(0).getTextContent();
+                int pontos = Integer.parseInt(
+                    elem.getElementsByTagName("pontos").item(0).getTextContent()
+                );
+                entradas.add(new EntradaPodio(nome, pontos));
+            }
 
-        public void setNome(String nome) {
-            this.nome = nome;
-        }
-
-        public int getPontuacao() {
-            return pontuacao;
-        }
-
-        public void setPontuacao(int pontuacao) {
-            this.pontuacao = pontuacao;
+            // Ordena por pontuação decrescente e mantém top 5
+            Collections.sort(
+                entradas,
+                Comparator.comparingInt(EntradaPodio::getPontos).reversed()
+            );
+            if (entradas.size() > 5) {
+                entradas = entradas.subList(0, 5);
+            }
+        } catch (Exception ex) {
+            System.err.println("Erro ao carregar o pódio: " + ex.getMessage());
+            entradas.clear();
         }
     }
 
-
-    //Adiciona uma nova pontuação ao pódio
     
-    public void adicionarPontuacao(String nome, int pontuacao) {
+    //Salva uma nova pontuação no pódio e atualiza o arquivo XML
+    //Em caso de erro imprime
+    
+    public void salvarPontuacao(String nomeJogador, int pontos) {
         try {
-            List<EntradaPodio> podio = lerPodio();
-            podio.add(new EntradaPodio(nome, pontuacao));
+            carregarPodio();
+            entradas.add(new EntradaPodio(nomeJogador, pontos));
 
-            // Ordena da maior para a menor pontuação
-            podio.sort((a, b) -> Integer.compare(b.getPontuacao(), a.getPontuacao()));
-
-           
-
-            salvarPodio(podio);
-        } catch (Exception e) {
-            System.err.println("Erro ao atualizar o pódio: " + e.getMessage());
-        }
-    }
-
-     //Lê o pódio a partir do arquivo XML
-     
-    public List<EntradaPodio> lerPodio() {
-        List<EntradaPodio> podio = new ArrayList<>();
-        try {
-            File xmlFile = new File(ARQUIVO_XML);
-            if (!xmlFile.exists()) {
-                return podio; // Arquivo não existe, retorna lista vazia
+            Collections.sort(
+                entradas,
+                Comparator.comparingInt(EntradaPodio::getPontos).reversed()
+            );
+            if (entradas.size() > 5) {
+                entradas = entradas.subList(0, 5);
             }
 
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(xmlFile);
-            NodeList nodes = doc.getElementsByTagName("entrada");
-
-            for (int i = 0; i < nodes.getLength(); i++) {
-                Element element = (Element) nodes.item(i);
-                String nome = element.getElementsByTagName("nome").item(0).getTextContent();
-                int pontuacao = Integer.parseInt(element.getElementsByTagName("pontuacao").item(0).getTextContent());
-                podio.add(new EntradaPodio(nome, pontuacao));
+            Document doc = criarDocumento();
+            Element raiz = doc.createElement("podio");
+            doc.appendChild(raiz);
+            for (EntradaPodio e : entradas) {
+                Element entry = doc.createElement("entrada");
+                Element nomeElem = doc.createElement("nome");
+                nomeElem.appendChild(doc.createTextNode(e.getNome()));
+                Element pontosElem = doc.createElement("pontos");
+                pontosElem.appendChild(doc.createTextNode(String.valueOf(e.getPontos())));
+                entry.appendChild(nomeElem);
+                entry.appendChild(pontosElem);
+                raiz.appendChild(entry);
             }
-        } catch (Exception e) {
-            System.err.println("Erro ao ler o pódio: " + e.getMessage());
-        }
-        return podio;
-    }
-
-    // Salva o pódio no arquivo XML com formatação indentada
-     
-    private void salvarPodio(List<EntradaPodio> podio) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.newDocument();
-
-            Element root = doc.createElement("podio");
-            doc.appendChild(root);
-
-            for (EntradaPodio entrada : podio) {
-                Element e = doc.createElement("entrada");
-
-                Element nome = doc.createElement("nome");
-                nome.setTextContent(entrada.getNome());
-                e.appendChild(nome);
-
-                Element pontuacao = doc.createElement("pontuacao");
-                pontuacao.setTextContent(String.valueOf(entrada.getPontuacao()));
-                e.appendChild(pontuacao);
-
-                root.appendChild(e);
-            }
-
             salvarDocumento(doc);
-
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar o pódio: " + e.getMessage());
-        }
-    }
-
-    //Formata o XML de forma indentada e salva no disco
-
-    private void salvarDocumento(Document doc) {
-        try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-            DOMSource source = new DOMSource(doc);
-            try (FileOutputStream out = new FileOutputStream(ARQUIVO_XML)) {
-                transformer.transform(source, new StreamResult(out));
-            }
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar o arquivo XML: " + e.getMessage());
+        } catch (Exception ex) {
+            System.err.println("Erro ao atualizar o pódio: " + ex.getMessage());
         }
     }
 
     
-    //Exibe o pódio formatado
-     
+    //Retorna as entradas carregadas do pódio
+    
+    public List<EntradaPodio> getEntradas() {
+        return entradas;
+    }
+
+
+    /**
+     * Exibe o pódio formatado no console.
+     */
     public void exibirPodio() {
-        List<EntradaPodio> podio = lerPodio();
-        System.out.println("======= PÓDIO MAIORES PONTUAÇÕES =======");
-        for (int i = 0; i < TAMANHO_MAXIMO; i++) {
-            if (i < podio.size()) {
-                EntradaPodio entrada = podio.get(i);
-                System.out.printf("- %dº - %s : [%03d]%n", i + 1, entrada.getNome(), entrada.getPontuacao());
+        carregarPodio();
+        System.out.println("======= PÓDIO MAIORES PONTUAÇÕES =======\n");
+        for (int i = 0; i < 5; i++) {
+            if (i < entradas.size()) {
+                EntradaPodio e = entradas.get(i);
+                System.out.printf("- %dº - %s : [%03d]%n", i + 1, e.getNome(), e.getPontos());
             } else {
-                System.out.printf("- %dº - ==== : 000%n", i + 1);
+                System.out.printf("- %dº - ==== : [000]%n", i + 1);
             }
         }
     }
-} 
+
+    // Cria um Document XML em branco
+    private Document criarDocumento() throws ParserConfigurationException {
+        return DocumentBuilderFactory
+            .newInstance()
+            .newDocumentBuilder()
+            .newDocument();
+    }
+
+    // Grava o Document em formato indentado no disco
+    private void salvarDocumento(Document doc)
+            throws TransformerException, IOException {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(
+            "{http://xml.apache.org/xslt}indent-amount", "2"
+        );
+        DOMSource source = new DOMSource(doc);
+        try (FileOutputStream out = new FileOutputStream(ARQUIVO_XML)) {
+            transformer.transform(source, new StreamResult(out));
+        }
+    }
+
+    
+    //Representa uma entrada do pódio: nome e pontos
+    
+    public static class EntradaPodio {
+        private final String nome;
+        private final int pontos;
+        public EntradaPodio(String nome, int pontos) {
+            this.nome = nome;
+            this.pontos = pontos;
+        }
+        public String getNome() { return nome; }
+        public int getPontos() { return pontos; }
+    }
+}

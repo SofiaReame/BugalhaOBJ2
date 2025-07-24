@@ -137,11 +137,36 @@ public class Cliente {
     }
 
     public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            new Cliente(scanner);
-        } catch (Exception e) {
-            System.out.println("Erro no cliente: " + e.getMessage());
-            e.printStackTrace();
-        }
+        Scanner scanner = new Scanner(System.in);
+        Podio podio = new Podio();
+        boolean executando = true;
+        do {
+            System.out.println("=== BUGALHA ===");
+            System.out.println("1. Ver pódio");
+            System.out.println("2. Jogar partida");
+            System.out.println("3. Sair");
+            System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
+            switch (opcao) {
+                case 1:
+                    podio.exibirPodio();
+                    break;
+                case 2:
+                    try {
+                        new Cliente(scanner);
+                    } catch (Exception e) {
+                        System.out.println("Erro no cliente: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                    break;
+                case 3:
+                    System.out.println("Saindo...");
+                    executando = false;
+                    break;
+                default:
+                    System.out.println("Opcao invalida.");
+            }
+        } while (executando);
+        scanner.close();
     }
 }
