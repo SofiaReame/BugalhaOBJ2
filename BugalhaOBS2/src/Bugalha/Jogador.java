@@ -55,13 +55,6 @@ public class Jogador {
         }
         return true;
     }
-    // Exibe o tabuleiro (teste)
-    public void mostrarTabuleiro() {
-        System.out.println("Tabuleiro de " + nome + ":");
-        for (int i = 0; i < 3; i++) {
-            System.out.println("Coluna " + (i+1) + ": " + colunas[i]);
-        }
-    }
     
     public void limparTabuleiro() {
         for (ArrayList<Integer> coluna : colunas) {

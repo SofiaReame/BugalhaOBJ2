@@ -17,13 +17,14 @@ public class Cliente {
 
     public Cliente(Scanner scanner) throws Exception {
         this.scanner = scanner;
+        this.podio = new Podio();
 
         System.out.print("Digite seu nome: ");
         String meuNome = scanner.nextLine().trim();
 
-        /*======================LEMBRAR DE TROCAR O IP DE ACORDO COM OS TESTES ======================*/
-        
-        //String ipServidor = "192.168.0.245"; // IP V
+         //======================LEMBRAR DE TROCAR O IP DE ACORDO COM OS TESTES ======================
+
+        // String ipServidor = "192.168.0.245"; // IP V
         String ipServidor = "192.168.0.222"; // IP S
         int portaServidor = 12345;
 
@@ -50,16 +51,16 @@ public class Cliente {
         System.out.println("Voce eh o jogador " + idJogador);
         System.out.println("Seu nome: " + nomeJogador);
         System.out.println("Adversario: " + nomeAdversario);
-        
+
         // Cria jogo com nomes
         jogo = new Jogo(scanner, nomeJogador, nomeAdversario);
-        
+
         boolean continuar = true;
-        
-        do {   
-           // inicia jogo e gerencia reinício
-           jogar(); 
-           
+
+        do {
+            // inicia jogo e gerencia reinício
+            jogar();
+
             // Após fim da partida, verifica reinício
             System.out.print("\nDeseja jogar novamente? (s/n): ");
             String resposta = scanner.nextLine().trim();
@@ -69,15 +70,15 @@ public class Cliente {
             String respostaAdversario = (String) entrada.readObject();
 
             if (resposta.equalsIgnoreCase("s") && respostaAdversario.equalsIgnoreCase("s")) {
-                jogo.reiniciarTabuleiros(); 
-                minhaVez = !minhaVez; 
+                jogo.reiniciarTabuleiros();
+                minhaVez = !minhaVez;
                 System.out.println("\nNovo jogo iniciado!\n");
             } else {
                 continuar = false;
                 System.out.println("\nUm dos jogadores optou por sair. Encerrando partida.");
             }
         } while (continuar);
-         
+
         socket.close(); // encerra conexão ao final
     }
 

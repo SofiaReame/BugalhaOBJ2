@@ -126,9 +126,10 @@ public class Podio {
         for (int i = 0; i < 5; i++) {
             if (i < entradas.size()) {
                 EntradaPodio e = entradas.get(i);
-                System.out.printf("- %dº - %s : [%03d]%n", i + 1, e.getNome(), e.getPontos());
+                System.out.printf("- %dº - %s : [%02d]%n", i + 1, e.getNome(), e.getPontos());
             } else {
-                System.out.printf("- %dº - ==== : [000]%n", i + 1);
+                System.out.printf("- %dº - ==== : [00]%n", i + 1);
+                System.out.println("%n%n");
             }
         }
     }
