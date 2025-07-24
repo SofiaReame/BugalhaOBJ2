@@ -4,10 +4,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Servidor {
-    
+
     public static void main(String[] args) throws Exception {
+        Podio podioXML = new Podio();
         int porta = 12345;
         ServerSocket servidor = new ServerSocket(porta);
         System.out.println("Servidor iniciado na porta " + porta + ". Aguardando jogadores...");
@@ -18,7 +22,7 @@ public class Servidor {
         ObjectOutputStream saidaJogador1 = new ObjectOutputStream(jogador1.getOutputStream());
         saidaJogador1.flush();
         ObjectInputStream entradaJogador1 = new ObjectInputStream(jogador1.getInputStream());
-        
+
         // Recebe o nome do jogador 1
         String nomeJogador1 = (String) entradaJogador1.readObject();
         System.out.println("Nome do Jogador 1: " + nomeJogador1);
@@ -41,33 +45,64 @@ public class Servidor {
         saidaJogador2.writeObject("2;false;" + nomeJogador2 + ";" + nomeJogador1);
         saidaJogador2.flush();
 
+        // JOGADOR 1 MASTER
         Thread t1 = new Thread(() -> {
             try {
                 while (true) {
-                    String jogada = (String) entradaJogador1.readObject();
-                    saidaJogador2.writeObject(jogada);
-                    saidaJogador2.flush();
+                    String msg = (String) entradaJogador1.readObject();
+
+                    if (msg.startsWith("FIM;")) {
+                        // Parseia dados do vencedor
+                        String[] partes = msg.split(";");
+                        // partes[1]=nome1, partes[2]=pontos1 talvez 3 e 4 em empate
+
+                        // Salva no Podio
+                        if (partes.length == 3) {
+                            podioXML.salvarPontuacao(partes[1], Integer.parseInt(partes[2]));
+                        } else if (partes.length == 5) {
+                            podioXML.salvarPontuacao(partes[1], Integer.parseInt(partes[2]));
+                            podioXML.salvarPontuacao(partes[3], Integer.parseInt(partes[4]));
+                        }
+
+                        // Lê o XML inteiro como string
+                        String xmlAtualizado = Files.readString(
+                                Paths.get("podio.xml"), StandardCharsets.UTF_8);
+
+                        // Envia para ambos os clientes, prefixando para identificar
+                        String payload = "PODIO;" + xmlAtualizado;
+                        saidaJogador1.writeObject(payload);
+                        saidaJogador1.flush();
+                        saidaJogador2.writeObject(payload);
+                        saidaJogador2.flush();
+
+                    } else {
+                        // encaminha jogada normal para o adversário
+                        saidaJogador2.writeObject(msg);
+                        saidaJogador2.flush();
+                    }
                 }
             } catch (Exception e) {
                 System.out.println("Jogador 1 desconectou.");
             }
         });
-        
+
+        //JOGADOR 2 NORMAL
         Thread t2 = new Thread(() -> {
             try {
                 while (true) {
-                    String jogada = (String) entradaJogador2.readObject();
-                    saidaJogador1.writeObject(jogada);
+                    String msg = (String) entradaJogador2.readObject();
+                    // não processa FIM - encaminha tudo para o 1
+                    saidaJogador1.writeObject(msg);
                     saidaJogador1.flush();
                 }
             } catch (Exception e) {
                 System.out.println("Jogador 2 desconectou.");
             }
         });
-        
+
         t1.start();
         t2.start();
-        
+
         t1.join();
         t2.join();
 

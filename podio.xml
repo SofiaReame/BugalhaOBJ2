@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <podio>
   <entrada>
+    <nome>Wolf</nome>
+    <pontos>66</pontos>
+  </entrada>
+  <entrada>
     <nome>Sofia</nome>
     <pontos>54</pontos>
   </entrada>
   <entrada>
     <nome>Sofia</nome>
     <pontos>54</pontos>
+  </entrada>
+  <entrada>
+    <nome>Sofia</nome>
+    <pontos>43</pontos>
   </entrada>
 </podio>

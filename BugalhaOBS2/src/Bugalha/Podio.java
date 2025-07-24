@@ -117,9 +117,8 @@ public class Podio {
     }
 
 
-    /**
-     * Exibe o pódio formatado no console.
-     */
+    
+    //Exibe o pódio formatado.
     public void exibirPodio() {
         carregarPodio();
         System.out.println("======= PÓDIO MAIORES PONTUAÇÕES =======\n");
@@ -129,9 +128,9 @@ public class Podio {
                 System.out.printf("- %dº - %s : [%02d]%n", i + 1, e.getNome(), e.getPontos());
             } else {
                 System.out.printf("- %dº - ==== : [00]%n", i + 1);
-                System.out.println("%n%n");
             }
         }
+        System.out.println();
     }
 
     // Cria um Document XML em branco

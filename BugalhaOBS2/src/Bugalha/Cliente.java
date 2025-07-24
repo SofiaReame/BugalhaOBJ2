@@ -1,8 +1,10 @@
 package Bugalha;
 
+import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Cliente {
@@ -23,7 +25,8 @@ public class Cliente {
         System.out.print("Digite seu nome: ");
         String meuNome = scanner.nextLine().trim();
 
-         //======================LEMBRAR DE TROCAR O IP DE ACORDO COM OS TESTES ======================
+        // ======================LEMBRAR DE TROCAR O IP DE ACORDO COM OS TESTES
+        // ======================
 
         // String ipServidor = "192.168.0.245"; // IP V
         String ipServidor = "192.168.0.222"; // IP S
@@ -76,7 +79,7 @@ public class Cliente {
                 System.out.println("\nNovo jogo iniciado!\n");
             } else {
                 continuar = false;
-                System.out.println("\nUm dos jogadores optou por sair. Encerrando partida.");
+                System.out.println("\nUm dos jogadores optou por sair. Encerrando partida.\n");
             }
         } while (continuar);
 
@@ -89,7 +92,35 @@ public class Cliente {
             if (jogo.fimDeJogo()) {
                 System.out.println("\n*** FIM DE JOGO ***");
                 jogo.mostrarTabuleiros();
-                jogo.mostrarPontuacoesEFim();
+                String[] dadosVencedores = jogo.mostrarPontuacoesEFim();
+
+                // Enviar dados para o servidor
+                StringBuilder sb = new StringBuilder("FIM;");
+                for (String s : dadosVencedores) {
+                    sb.append(s).append(";");
+                }
+                saida.writeObject(sb.toString());
+                saida.flush();
+
+                // Aguarda XML atualizado
+                String resposta = (String) entrada.readObject();
+                if (resposta.startsWith("PODIO;")) {
+                    String xml = resposta.substring("PODIO;".length());
+
+                    // Salva o XML localmente
+                    try (FileOutputStream fos = new FileOutputStream("podio.xml")) {
+                        fos.write(xml.getBytes(StandardCharsets.UTF_8));
+                    }
+
+                    // Informa a Atualização
+                    podio = new Podio();
+                    System.out.println("\n=== PÓDIO ATUALIZADO ===");
+                } else if (dadosVencedores.length == 0) {
+                    System.out.println("Houve um erro ao calcular o vencedor. O pódio não será salvo.");
+                } else {
+                    System.out.println("\nObrigado por jogar, jogador 2");
+
+                }
                 break;
             }
 
@@ -149,6 +180,7 @@ public class Cliente {
             System.out.println("3. Sair");
             System.out.print("Escolha uma opção: ");
             int opcao = Integer.parseInt(scanner.nextLine());
+            System.out.println();
             switch (opcao) {
                 case 1:
                     podio.exibirPodio();
@@ -162,11 +194,11 @@ public class Cliente {
                     }
                     break;
                 case 3:
-                    System.out.println("Saindo...");
+                    System.out.println("Saindo...\n\n");
                     executando = false;
                     break;
                 default:
-                    System.out.println("Opcao invalida.");
+                    System.out.println("Opcao invalida.\n");
             }
         } while (executando);
         scanner.close();
